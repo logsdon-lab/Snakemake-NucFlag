@@ -1,0 +1,155 @@
+include: "rules/common.smk"
+
+
+SAMPLE_ASSEMBLIES, SAMPLE_READS = get_sample_assemblies_and_reads()
+SAMPLE_BEDS = {sm["name"]: sm["region_bed"] for sm in config["samples"]}
+
+
+wildcard_constraints:
+    sm="|".join(SAMPLE_ASSEMBLIES.keys()),
+
+
+rule merge_asm_files:
+    input:
+        asm_files=lambda wc: ancient(
+            SAMPLE_ASSEMBLIES[str(wc.sm)]
+        ),
+    output:
+        asm=os.path.join(config["output_dir"], "{sm}_merged_asm.fa"),
+    shell:
+        """
+        for file in {input.asm_files}; do
+            cat $file || true >> {output.asm}
+            zcat $file || true >> {output.asm}
+        done
+        """
+
+
+rule align_reads_to_asm:
+    input:
+        asm=rules.merge_asm_files.output.asm,
+        reads=lambda wc: f"{str(wc.id).replace('~', '/')}.{wc.ext}",
+    output:
+        temp(os.path.join(config["output_dir"], "{sm}_{id}_{ext}_hifi.bam")),
+    threads: config["threads_aln"]
+    resources:
+        mem=config["mem_aln"],
+        sort_mem=4,
+    params:
+        aln_log_level="DEBUG",
+        aln_preset="SUBREAD",
+        aln_min_length=5000,
+        tmp_dir=config.get("tmp_dir", os.environ.get("TMPDIR", "/tmp")),
+        samtools_view_flag=config["samtools_view_flag"],
+    conda:
+        "env/align.yaml"
+    log:
+        "logs/align_{sm}_{id}_{ext}_hifi_reads_to_asm.log",
+    benchmark:
+        "benchmarks/align_{sm}_{id}_{ext}_hifi_reads_to_asm.tsv"
+    shell:
+        """
+        {{ pbmm2 align \
+        --log-level {params.aln_log_level} \
+        --preset {params.aln_preset} \
+        --min-length {params.aln_min_length} \
+        -j {threads} {input.asm} {input.reads} | \
+        samtools view -F {params.samtools_view_flag} -u - | \
+        samtools sort -T {params.tmp_dir} -m {resources.sort_mem}G -@ {threads} - ;}} > {output} 2>> {log}
+        """
+
+
+def get_aln_to_asm(wc) -> list[str]:
+    sm_reads = SAMPLE_READS[str(wc.sm)]
+    sm_ids, sm_exts = [], []
+    for f in sm_reads:
+        sm_id, sm_ext = os.path.splitext(f)
+        sm_ids.append(sm_id)
+        sm_exts.append(sm_ext.replace(".", ""))
+    # Replace forward slashes with tildes to avoid issues with file paths
+    sm_ids = [i.replace("/", "~") for i in sm_ids]
+    alns = expand(
+        rules.align_reads_to_asm.output,
+        zip,
+        sm=[wc.sm],
+        id=sm_ids,
+        ext=sm_exts
+    )
+    if not alns:
+        raise FileNotFoundError
+    return ancient(alns)
+
+
+rule merge_hifi_read_asm_alignments:
+    input:
+        get_aln_to_asm,
+    output:
+        alignment=os.path.join(config["output_dir"], "{sm}_hifi.bam"),
+        alignment_idx=os.path.join(
+            config["output_dir"], "{sm}_hifi.bam.bai"
+        ),
+    threads: config["threads_aln"]
+    resources:
+        mem=10,
+        sort_mem=4,
+    params:
+        tmp_dir=config.get("tmp_dir", os.environ.get("TMPDIR", "/tmp")),
+    conda:
+        "env/align.yaml"
+    log:
+        "logs/merge_{sm}_hifi_read_asm_alignments.log",
+    benchmark:
+        "benchmarks/merge_{sm}_hifi_read_asm_alignments.tsv"
+    shell:
+        """
+        {{ samtools merge -@ {threads} - {input} | \
+        samtools sort -T {params.tmp_dir} -m {resources.sort_mem}G -@ {threads} -;}} > {output.alignment} 2> {log}
+        samtools index {output.alignment} 2>> {log}
+        """
+
+
+rule check_asm_nucflag:
+    input:
+        bam_file=ancient(rules.merge_hifi_read_asm_alignments.output.alignment),
+        regions=lambda wc: SAMPLE_BEDS[str(wc.sm)],
+        config=config["config_nucflag"],
+        ignore_regions=config["ignore_regions"],
+    output:
+        plot_dir=directory(os.path.join(config["output_dir"], "{sm}")),
+        misassemblies=os.path.join(
+            config["output_dir"],
+            "{sm}_cen_misassemblies.bed",
+        ),
+        asm_status=os.path.join(
+            config["output_dir"],
+            "{sm}_cen_status.bed",
+        ),
+    threads: config["processes_nucflag"]
+    conda:
+        "env/nucflag.yaml"
+    resources:
+        mem=config["mem_nucflag"],
+    log:
+        "logs/run_nucflag_{sm}.log",
+    benchmark:
+        "benchmarks/run_nucflag_{sm}.tsv"
+    shell:
+        """
+        nucflag \
+        -i {input.bam_file} \
+        -b {input.regions} \
+        -d {output.plot_dir} \
+        -o {output.misassemblies} \
+        -t {threads} \
+        -p {threads} \
+        -s {output.asm_status} \
+        -c {input.config} \
+        --ignore_regions {input.ignore_regions} &> {log}
+        """
+
+
+rule nucflag:
+    input:
+        expand(rules.check_asm_nucflag.output, sm=SAMPLE_ASSEMBLIES.keys()),
+    default_target:
+        True

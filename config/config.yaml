@@ -1,0 +1,22 @@
+
+samples:
+  - name: "sample1"
+    asm_fofn: "test/sample1/asm.fofn"
+    read_fofn: "test/sample1/reads.fofn"
+    region_bed: "test/sample1/region.bed"
+  - name: "sample2"
+    asm_dir: "test/sample2/asm"
+    asm_ext: "fq"
+    read_dir: "test/sample2/reads"
+    read_ext: "bam"
+    region_bed: "test/sample2/region.bed"
+
+output_dir: "results/nucflag"
+tmp_dir: "temp"
+config_nucflag: "config/nucflag.toml"
+ignore_regions: "config/nucflag_ignore.bed"
+threads_aln: 4
+mem_aln: 16
+processes_nucflag: 12
+mem_nucflag: 50
+samtools_view_flag: 2308
