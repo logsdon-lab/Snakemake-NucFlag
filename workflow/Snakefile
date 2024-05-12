@@ -14,6 +14,10 @@ rule merge_asm_files:
         asm_files=lambda wc: ancient(SAMPLE_ASSEMBLIES[str(wc.sm)].values()),
     output:
         asm=os.path.join(config["output_dir"], "{sm}_merged_asm.fa"),
+    conda:
+        "env/tools.yaml"
+    log:
+        "logs/merge_{sm}_asm_files.log",
     shell:
         """
         for file in {input.asm_files}; do
@@ -23,12 +27,17 @@ rule merge_asm_files:
                 cat $file >> {output.asm}
             fi
         done
+        seqkit rmdup {output.asm} > {output.asm} 2> {log}
         """
 
 
 rule align_reads_to_asm:
     input:
-        asm=rules.merge_asm_files.output.asm,
+        asm=lambda wc: (
+            rules.merge_asm_files.output.asm
+            if isinstance(SAMPLE_ASSEMBLIES[str(wc.sm)], dict)
+            else SAMPLE_ASSEMBLIES[str(wc.sm)]
+        ),
         reads=lambda wc: SAMPLE_READS[str(wc.sm)][str(wc.id)],
     output:
         temp(os.path.join(config["output_dir"], "{sm}_{id}_hifi.bam")),
@@ -43,7 +52,7 @@ rule align_reads_to_asm:
         tmp_dir=config.get("tmp_dir", os.environ.get("TMPDIR", "/tmp")),
         samtools_view_flag=config["samtools_view_flag"],
     conda:
-        "env/align.yaml"
+        "env/tools.yaml"
     log:
         "logs/align_{sm}_{id}_hifi_reads_to_asm.log",
     benchmark:
@@ -85,7 +94,7 @@ rule merge_hifi_read_asm_alignments:
     params:
         tmp_dir=config.get("tmp_dir", os.environ.get("TMPDIR", "/tmp")),
     conda:
-        "env/align.yaml"
+        "env/tools.yaml"
     log:
         "logs/merge_{sm}_hifi_read_asm_alignments.log",
     benchmark:

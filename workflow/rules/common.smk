@@ -42,6 +42,8 @@ def get_sample_assemblies_and_reads() -> (
         elif sm.get("asm_dir") and sm.get("asm_ext"):
             for file, fid in get_dir_files(sm["asm_dir"], sm["asm_ext"]):
                 SAMPLE_ASSEMBLIES[sm_name][fid] = file
+        elif sm.get("asm_fa"):
+            SAMPLE_ASSEMBLIES[sm_name] = file
         else:
             raise ValueError("Must provide either asm_fofn or asm_dir and asm_ext.")
 

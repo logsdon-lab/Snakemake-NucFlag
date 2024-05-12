@@ -4,3 +4,4 @@ channels:
 dependencies:
   - samtools
   - pbmm2
+  - seqkit
