@@ -1,27 +1,17 @@
 
 samples:
-  - name: "sample1"
-    asm_fofn: "test/sample1/asm.fofn"
-    read_fofn: "test/sample1/reads.fofn"
-    region_bed: "test/sample1/region.bed"
-  - name: "sample2"
-    asm_dir: "test/sample2/asm"
-    asm_ext: "fa"
-    read_dir: "test/sample2/reads"
-    read_ext: "bam"
-    region_bed: "test/sample2/region.bed"
-  - name: "sample3"
-    asm_fa: "test/sample3/test.fa"
-    read_dir: "test/sample3/reads"
-    read_ext: "bam"
-    region_bed: "test/sample3/region.bed"
+  - name: "K1463_2216_h2"
+    asm_fa: /project/logsdon_shared/projects/asm-repair/fa/K1463_2216_hifiasm.fa
+    read_dir: "/project/logsdon_shared/data/platinum_genomes/data/pacbio_hifi/K1463_2216/"
+    read_ext: "fastq.gz"
+    region_bed: "/project/logsdon_shared/projects/asm-repair/fa/K1463_2216_ALR_regions.bed"
 
 output_dir: "results/nucflag"
 tmp_dir: "temp"
 config_nucflag: "config/nucflag.toml"
 ignore_regions: "config/nucflag_ignore.bed"
-threads_aln: 4
-mem_aln: 16
+threads_aln: 8
+mem_aln: 30
 processes_nucflag: 12
 mem_nucflag: 50
 samtools_view_flag: 2308

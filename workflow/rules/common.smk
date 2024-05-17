@@ -11,10 +11,10 @@ def read_fofn_file(path: str) -> Iterator[tuple[str, str]]:
             yield abs_path, fname
 
 
-def get_dir_files(dirname: str, ext: str) -> Iterator[tuple[str, str]]:
+def get_dir_files(dirname: str, ext: str, depth: int = 1) -> Iterator[tuple[str, str]]:
     escaped_ext = re.escape(f".{ext}")
     path_pattern = re.compile(r"([^/]+)(" + escaped_ext + ")$")
-    for root, read_dirs, fnames in os.walk(dirname):
+    for i, (root, read_dirs, fnames) in enumerate(os.walk(dirname), 1):
         for file in fnames:
             read_dir_path = os.path.join(root, file)
             try:
@@ -23,6 +23,9 @@ def get_dir_files(dirname: str, ext: str) -> Iterator[tuple[str, str]]:
                 continue
 
             yield read_dir_path, flowcell_id
+
+        if i == depth:
+            break
 
 
 def get_sample_assemblies_and_reads() -> (
