@@ -2,7 +2,7 @@ include: "rules/common.smk"
 
 
 SAMPLE_ASSEMBLIES, SAMPLE_READS = get_sample_assemblies_and_reads()
-SAMPLE_BEDS = {sm["name"]: sm["region_bed"] for sm in config["samples"]}
+SAMPLE_INFO = {sm["name"]: sm for sm in config["samples"]}
 
 
 wildcard_constraints:
@@ -77,7 +77,7 @@ def get_aln_to_asm(wc) -> list[str]:
         expand(rules.align_reads_to_asm.output, zip, sm=samples, id=sm_reads.keys())
     )
     if not alns:
-        raise FileNotFoundError
+        raise FileNotFoundError(f"No reads found for sample: {SAMPLE_INFO[str(wc.sm)]}")
     return ancient(alns)
 
 
@@ -110,7 +110,7 @@ rule merge_hifi_read_asm_alignments:
 rule check_asm_nucflag:
     input:
         bam_file=ancient(rules.merge_hifi_read_asm_alignments.output.alignment),
-        regions=lambda wc: SAMPLE_BEDS[str(wc.sm)],
+        regions=lambda wc: SAMPLE_INFO[str(wc.sm)]["region_bed"],
         config=config["config_nucflag"],
         ignore_regions=config["ignore_regions"],
     output:
