@@ -13,21 +13,24 @@ rule merge_asm_files:
     input:
         asm_files=lambda wc: ancient(SAMPLE_ASSEMBLIES[str(wc.sm)].values()),
     output:
-        asm=os.path.join(config["output_dir"], "{sm}_merged_asm.fa"),
+        merged_asm=temp(os.path.join(config["output_dir"], "{sm}_merged_asm.fa")),
+        asm=os.path.join(config["output_dir"], "{sm}_merged_dedup_asm.fa"),
     conda:
         "env/tools.yaml"
+    resources:
+        mem=8
     log:
         "logs/merge_{sm}_asm_files.log",
     shell:
         """
         for file in {input.asm_files}; do
             if [[ $file == *.gz ]]; then
-                zcat $file >> {output.asm}
+                zcat $file >> {output.merged_asm}
             else
-                cat $file >> {output.asm}
+                cat $file >> {output.merged_asm}
             fi
         done
-        seqkit rmdup {output.asm} > {output.asm} 2> {log}
+        seqkit rmdup {output.merged_asm} > {output.asm} 2> {log}
         """
 
 
