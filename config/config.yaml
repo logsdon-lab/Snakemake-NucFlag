@@ -8,6 +8,8 @@ samples:
 
 output_dir: "results/nucflag"
 tmp_dir: "temp"
+logs_dir: "logs/nucflag"
+benchmarks_dir: "benchmarks/nucflag"
 config_nucflag: "config/nucflag.toml"
 ignore_regions: "config/nucflag_ignore.bed"
 threads_aln: 8

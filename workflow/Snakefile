@@ -4,6 +4,10 @@ include: "rules/common.smk"
 SAMPLE_ASSEMBLIES, SAMPLE_READS = get_sample_assemblies_and_reads()
 SAMPLE_INFO = {sm["name"]: sm for sm in config["samples"]}
 
+TMP_DIR = config.get("tmp_dir", os.environ.get("TMPDIR", "/tmp"))
+LOGS_DIR = config.get("logs_dir", "logs/nucflag")
+BMKS_DIR = config.get("benchmarks_dir", "benchmarks/nucflag")
+
 
 wildcard_constraints:
     sm="|".join(SAMPLE_ASSEMBLIES.keys()),
@@ -18,9 +22,9 @@ rule merge_asm_files:
     conda:
         "env/tools.yaml"
     resources:
-        mem=8
+        mem=8,
     log:
-        "logs/merge_{sm}_asm_files.log",
+        os.path.join(LOGS_DIR, "merge_{sm}_asm_files.log"),
     shell:
         """
         for file in {input.asm_files}; do
@@ -57,9 +61,9 @@ rule align_reads_to_asm:
     conda:
         "env/tools.yaml"
     log:
-        "logs/align_{sm}_{id}_hifi_reads_to_asm.log",
+        os.path.join(LOGS_DIR, "align_{sm}_{id}_hifi_reads_to_asm.log"),
     benchmark:
-        "benchmarks/align_{sm}_{id}_hifi_reads_to_asm.tsv"
+        os.path.join(BMKS_DIR, "align_{sm}_{id}_hifi_reads_to_asm.tsv")
     shell:
         """
         {{ pbmm2 align \
@@ -99,9 +103,9 @@ rule merge_hifi_read_asm_alignments:
     conda:
         "env/tools.yaml"
     log:
-        "logs/merge_{sm}_hifi_read_asm_alignments.log",
+        os.path.join(LOGS_DIR, "merge_{sm}_hifi_read_asm_alignments.log"),
     benchmark:
-        "benchmarks/merge_{sm}_hifi_read_asm_alignments.tsv"
+        os.path.join(BMKS_DIR, "merge_{sm}_hifi_read_asm_alignments.tsv")
     shell:
         """
         {{ samtools merge -@ {threads} - {input} | \
@@ -132,9 +136,9 @@ rule check_asm_nucflag:
     resources:
         mem=config["mem_nucflag"],
     log:
-        "logs/run_nucflag_{sm}.log",
+        os.path.join(LOGS_DIR, "run_nucflag_{sm}.log"),
     benchmark:
-        "benchmarks/run_nucflag_{sm}.tsv"
+        os.path.join(BMKS_DIR, "run_nucflag_{sm}.tsv")
     shell:
         """
         nucflag \

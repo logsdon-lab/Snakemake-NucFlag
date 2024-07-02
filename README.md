@@ -7,7 +7,7 @@ A workflow to map PacBio HiFi reads back to an assembly and check for misassembl
 git clone git@github.com:logsdon-lab/Snakemake-NucFlag.git
 ```
 
-#### Configuration
+#### Input
 Files can be passed multiple ways:
 
 ##### Assemblies
@@ -48,6 +48,22 @@ samples:
     read_dir: "1/"
     read_ext: "bam"
 ```
+
+
+### Output
+
+|Path|Description|
+|-|-|
+|`./{sample}/{contig}.png`|Per-base coverage graph plot with misassemblies highlighted.|
+|`./{sample}_cen_misassemblies.bed`|Bed file with misassemblies and their coordinates per contig.|
+|`./{sample}_cen_status.bed`|Bed file with each centromeric contig, coordinates, and status. Either `good` or `misassembled`.|
+
+
+### Configuration
+Configuration is handled via `nucflag.toml`.
+
+To read more, refer to the [`NucFlag` documentation](https://github.com/logsdon-lab/NucFlag?tab=readme-ov-file#usage).
+
 
 ### Usage
 ```bash
@@ -90,11 +106,3 @@ rule all:
     input:
         expand(rules.nucflag.input, sm=SAMPLE_NAMES),
 ```
-
-### Output
-
-|Path|Description|
-|-|-|
-|`./{sample}/{contig}.png`|Per-base coverage graph plot with misassemblies highlighted.|
-|`./{sample}_cen_misassemblies.bed`|Bed file with misassemblies and their coordinates per contig.|
-|`./{sample}_cen_status.bed`|Bed file with each centromeric contig, coordinates, and status. Either `good` or `misassembled`.|
