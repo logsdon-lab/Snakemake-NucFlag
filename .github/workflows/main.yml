@@ -13,4 +13,4 @@ jobs:
       with:
         directory: .
         snakefile: workflow/Snakefile
-        args: "--configfile test/config/config.yaml -c 1 -np"
+        args: "--configfile test/config.yaml -c 1 -np"
