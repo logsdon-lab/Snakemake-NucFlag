@@ -4,14 +4,15 @@ samples:
     asm_fa: /project/logsdon_shared/projects/asm-repair/fa/K1463_2216_hifiasm.fa
     read_dir: "/project/logsdon_shared/data/platinum_genomes/data/pacbio_hifi/K1463_2216/"
     read_ext: "fastq.gz"
+    config: "config/nucflag.toml"
     region_bed: "/project/logsdon_shared/projects/asm-repair/fa/K1463_2216_ALR_regions.bed"
+    ignore_bed: "config/nucflag_ignore.bed"
+    overlay_beds: []
 
 output_dir: "results/nucflag"
 tmp_dir: "temp"
 logs_dir: "logs/nucflag"
 benchmarks_dir: "benchmarks/nucflag"
-config_nucflag: "config/nucflag.toml"
-ignore_regions: "config/nucflag_ignore.bed"
 threads_aln: 8
 mem_aln: 30
 processes_nucflag: 12

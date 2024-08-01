@@ -51,13 +51,22 @@ samples:
     read_ext: "bam"
 ```
 
+#### Configuration
+The following optional are optional:
+```yaml
+samples:
+-   regions: ""
+    config: ""
+    ignore_regions: ""
+    overlay_regions: []
+```
 
 ### Output
 
 |Path|Description|
 |-|-|
-|`./{sample}/{contig}.png`|Per-base coverage graph plot with misassemblies highlighted.|
-|`./{sample}_cen_misassemblies.bed`|Bed file with misassemblies and their coordinates per contig.|
+|`./{sample}/{contig}.png`|Per-base coverage graph plot with heterozygous sites of read coverage and potential misassemblies highlighted.|
+|`./{sample}_cen_misassemblies.bed`|Bed file with heterozygous sites of read coverage and potential misassemblies with their coordinates per contig.|
 |`./{sample}_cen_status.bed`|Bed file with each centromeric contig, coordinates, and status. Either `good` or `misassembled`.|
 
 
@@ -84,7 +93,8 @@ NUCFLAG_CFG = {
             "asm_fa": f"{sm}.fa",
             "read_dir": f"reads/{sm}/",
             "read_ext": "bam",
-            "region_bed": f"regions/{sm}_region.bed"
+            "region_bed": f"regions/{sm}_region.bed",
+            "overlay_beds": []
         }
         for sm in SAMPLE_NAMES
     ],
