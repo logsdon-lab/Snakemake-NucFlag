@@ -124,6 +124,11 @@ rule check_asm_nucflag:
         overlay_regions=lambda wc: SAMPLE_INFO[str(wc.sm)].get("overlay_beds", []),
     output:
         plot_dir=directory(os.path.join(config["output_dir"], "{sm}")),
+        cov_dir=(
+            directory(os.path.join(config["output_dir"], "{sm}_coverage"))
+            if config.get("output_coverage")
+            else []
+        ),
         misassemblies=os.path.join(
             config["output_dir"],
             "{sm}_cen_misassemblies.bed",
@@ -141,6 +146,11 @@ rule check_asm_nucflag:
         overlay_regions=lambda wc, input: (
             f"--overlay_regions {' '.join(input.overlay_regions)}"
             if input.overlay_regions
+            else ""
+        ),
+        output_coverage=lambda wc, output: (
+            f"--output_cov_dir {output.cov_dir}"
+            if config.get("output_coverage")
             else ""
         ),
     threads: config["processes_nucflag"]
@@ -164,7 +174,8 @@ rule check_asm_nucflag:
         {params.config} \
         {params.regions} \
         {params.ignore_regions} \
-        {params.overlay_regions} &> {log}
+        {params.overlay_regions} \
+        {params.output_coverage} &> {log}
         """
 
 
