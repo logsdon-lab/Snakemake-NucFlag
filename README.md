@@ -87,13 +87,13 @@ The following optional are optional per sample:
 samples: [
     {
         # Regions to check. If omitted, checks entire assembly.
-        regions: "",
+        region_bed: "",
         # nucflag configuration
         config: "",
         # Regions to ignore.
-        ignore_regions: "",
+        ignore_bed: "",
         # Regions to overlap.
-        overlay_regions: []
+        overlay_beds: []
     }
 ]
 ```
