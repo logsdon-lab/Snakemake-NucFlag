@@ -10,7 +10,7 @@ git clone git@github.com:logsdon-lab/Snakemake-NucFlag.git
 ```
 
 #### Input
-Files can be passed multiple ways:
+Files can be passed multiple ways in the `samples` section of `config.yaml`:
 
 ##### Assemblies
 By path.
@@ -52,22 +52,51 @@ samples:
 ```
 
 #### Configuration
-The following optional are optional:
+General configuration can be filled in `config.yaml`:
 ```yaml
-samples:
--   regions: ""
-    config: ""
-    ignore_regions: ""
-    overlay_regions: []
+# Output directory
+output_dir: "results/nucflag"
+# Output 1st and 2nd base coverage in {output_dir}/{sm}_coverage.
+output_coverage: false
+# Temporary directory of intermediates
+tmp_dir: "temp"
+# Log directory
+logs_dir: "logs/nucflag"
+# Benchmarks directory
+benchmarks_dir: "benchmarks/nucflag"
+# Job resources. Memory in GB.
+threads_aln: 8
+mem_aln: 30
+processes_nucflag: 12
+mem_nucflag: 50
+# samtools view filter flag.
+samtools_view_flag: 2308
+```
+
+The following optional are optional per sample:
+```yaml
+samples: [
+    {
+        # Regions to check. If omitted, checks entire assembly.
+        regions: "",
+        # nucflag configuration
+        config: "",
+        # Regions to ignore.
+        ignore_regions: "",
+        # Regions to overlap.
+        overlay_regions: []
+    }
+]
 ```
 
 ### Output
 
 |Path|Description|
 |-|-|
-|`./{sample}/{contig}.png`|Per-base coverage graph plot with heterozygous sites of read coverage and potential misassemblies highlighted.|
-|`./{sample}_cen_misassemblies.bed`|Bed file with heterozygous sites of read coverage and potential misassemblies with their coordinates per contig.|
-|`./{sample}_cen_status.bed`|Bed file with each centromeric contig, coordinates, and status. Either `good` or `misassembled`.|
+|`./{output_dir}/{sample}/{contig}.png`|Per-base coverage graph plot with heterozygous sites of read coverage and potential misassemblies highlighted.|
+|`./{output_dir}/{sample}_cen_misassemblies.bed`|Bed file with heterozygous sites of read coverage and potential misassemblies with their coordinates per contig.|
+|`./{output_dir}/{sample}_cen_status.bed`|Bed file with each centromeric contig, coordinates, and status. Either `good` or `misassembled`.|
+|`./{output_dir}/{sample}_coverage/{contig}.tsv`|TSV file with base position, 1st and 2nd base coverage, and status. Either `good` or `misassembled`.|
 
 
 ### Configuration
