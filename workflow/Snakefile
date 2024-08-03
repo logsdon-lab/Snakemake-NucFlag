@@ -141,7 +141,7 @@ rule check_asm_nucflag:
         regions=lambda wc, input: f"-b {input.regions}" if input.regions else "",
         config=lambda wc, input: f"-c {input.config}" if input.config else "",
         ignore_regions=lambda wc, input: (
-            f"--ignore_regions {input.overlay_regions}" if input.ignore_regions else ""
+            f"--ignore_regions {input.ignore_regions}" if input.ignore_regions else ""
         ),
         overlay_regions=lambda wc, input: (
             f"--overlay_regions {' '.join(input.overlay_regions)}"

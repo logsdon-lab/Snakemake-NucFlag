@@ -10,6 +10,7 @@ samples:
     read_dir: test/sample2/reads
     read_ext: bam
     region_bed: test/sample2/region.bed
+    ignore_bed: "config/nucflag_ignore.bed"
   - name: sample3
     asm_fa: test/sample3/test.fa
     read_dir: test/sample3/reads
