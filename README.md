@@ -7,7 +7,13 @@ A workflow to map PacBio HiFi reads back to an assembly and check for misassembl
 ### Getting Started
 ```bash
 git clone git@github.com:logsdon-lab/Snakemake-NucFlag.git
+cd Snakemake-NucFlag
 ```
+
+### Configuration
+Configuration is handled via `nucflag.toml`.
+
+To read more, refer to the [`NucFlag` documentation](https://github.com/logsdon-lab/NucFlag/wiki/2.-Configuration).
 
 #### Input
 Files can be passed multiple ways in the `samples` section of `config.yaml`:
@@ -52,6 +58,8 @@ samples:
 ```
 
 #### Configuration
+
+##### General
 General configuration can be filled in `config.yaml`:
 ```yaml
 # Output directory
@@ -73,6 +81,7 @@ mem_nucflag: 50
 samtools_view_flag: 2308
 ```
 
+##### By Sample
 The following optional are optional per sample:
 ```yaml
 samples: [
@@ -90,19 +99,12 @@ samples: [
 ```
 
 ### Output
-
 |Path|Description|
 |-|-|
 |`./{output_dir}/{sample}/{contig}.png`|Per-base coverage graph plot with heterozygous sites of read coverage and potential misassemblies highlighted.|
 |`./{output_dir}/{sample}_cen_misassemblies.bed`|Bed file with heterozygous sites of read coverage and potential misassemblies with their coordinates per contig.|
 |`./{output_dir}/{sample}_cen_status.bed`|Bed file with each centromeric contig, coordinates, and status. Either `good` or `misassembled`.|
-|`./{output_dir}/{sample}_coverage/{contig}.tsv`|TSV file with base position, 1st and 2nd base coverage, and status. Either `good` or `misassembled`.|
-
-
-### Configuration
-Configuration is handled via `nucflag.toml`.
-
-To read more, refer to the [`NucFlag` documentation](https://github.com/logsdon-lab/NucFlag?tab=readme-ov-file#usage).
+|`./{output_dir}/{sample}_coverage/{contig}.tsv`|(Optional) TSV file with base position, 1st and 2nd base coverage, and status. Either `good` or `misassembled`.|
 
 
 ### Usage
