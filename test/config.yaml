@@ -10,18 +10,25 @@ samples:
     read_dir: test/sample2/reads
     read_ext: bam
     region_bed: test/sample2/region.bed
+    ignore_bed: "config/nucflag_ignore.bed"
   - name: sample3
     asm_fa: test/sample3/test.fa
     read_dir: test/sample3/reads
     read_ext: bam
     region_bed: test/sample3/region.bed
+  - name: sample4
+    asm_fa: test/sample4/test.fa
+    read_dir: test/sample3/reads
+    read_ext: bam
+    config: test/config.yaml
+    region_bed: test/sample4/region.bed
+    overlay_beds: [test/sample4/overlay_1.bed, test/sample4/overlay_2.bed]
 
 output_dir: "results/nucflag"
+output_coverage: true
 tmp_dir: "temp"
 logs_dir: "logs/nucflag"
 benchmarks_dir: "benchmarks/nucflag"
-config_nucflag: "config/nucflag.toml"
-ignore_regions: "config/nucflag_ignore.bed"
 threads_aln: 8
 mem_aln: 30
 processes_nucflag: 12
