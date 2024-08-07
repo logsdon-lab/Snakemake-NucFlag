@@ -58,7 +58,7 @@ rule align_reads_to_asm:
         aln_min_length=5000,
         tmp_dir=config.get("tmp_dir", os.environ.get("TMPDIR", "/tmp")),
         samtools_view=(
-            f"samtools view -F {config['samtools_view_flag']} - |"
+            f"samtools view -F {config['samtools_view_flag']} -u - |"
             if config.get("samtools_view_flag")
             else ""
         ),
