@@ -57,7 +57,11 @@ rule align_reads_to_asm:
         aln_preset="SUBREAD",
         aln_min_length=5000,
         tmp_dir=config.get("tmp_dir", os.environ.get("TMPDIR", "/tmp")),
-        samtools_view_flag=config["samtools_view_flag"],
+        samtools_view_flag=(
+            f"-F {config['samtools_view_flag']}"
+            if config.get("samtools_view_flag")
+            else ""
+        ),
     conda:
         "env/tools.yaml"
     log:
@@ -71,7 +75,7 @@ rule align_reads_to_asm:
         --preset {params.aln_preset} \
         --min-length {params.aln_min_length} \
         -j {threads} {input.asm} {input.reads} | \
-        samtools view -F {params.samtools_view_flag} -u - | \
+        samtools view {params.samtools_view_flag} -u - | \
         samtools sort -T {params.tmp_dir} -m {resources.sort_mem}G -@ {threads} - ;}} > {output} 2>> {log}
         """
 
