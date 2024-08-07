@@ -57,8 +57,8 @@ rule align_reads_to_asm:
         aln_preset="SUBREAD",
         aln_min_length=5000,
         tmp_dir=config.get("tmp_dir", os.environ.get("TMPDIR", "/tmp")),
-        samtools_view_flag=(
-            f"-F {config['samtools_view_flag']}"
+        samtools_view=(
+            f"samtools view -F {config['samtools_view_flag']} - |"
             if config.get("samtools_view_flag")
             else ""
         ),
@@ -74,8 +74,7 @@ rule align_reads_to_asm:
         --log-level {params.aln_log_level} \
         --preset {params.aln_preset} \
         --min-length {params.aln_min_length} \
-        -j {threads} {input.asm} {input.reads} | \
-        samtools view {params.samtools_view_flag} -u - | \
+        -j {threads} {input.asm} {input.reads} | {params.samtools_view} \
         samtools sort -T {params.tmp_dir} -m {resources.sort_mem}G -@ {threads} - ;}} > {output} 2>> {log}
         """
 
