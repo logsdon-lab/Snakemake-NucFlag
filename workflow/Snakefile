@@ -53,9 +53,6 @@ rule align_reads_to_asm:
         mem=config["mem_aln"],
         sort_mem=4,
     params:
-        aln_log_level="DEBUG",
-        aln_preset="SUBREAD",
-        aln_min_length=5000,
         tmp_dir=config.get("tmp_dir", os.environ.get("TMPDIR", "/tmp")),
         samtools_view=(
             f"samtools view -F {config['samtools_view_flag']} -u - |"
@@ -70,11 +67,10 @@ rule align_reads_to_asm:
         os.path.join(BMKS_DIR, "align_{sm}_{id}_hifi_reads_to_asm.tsv")
     shell:
         """
-        {{ pbmm2 align \
-        --log-level {params.aln_log_level} \
-        --preset {params.aln_preset} \
-        --min-length {params.aln_min_length} \
-        -j {threads} {input.asm} {input.reads} | {params.samtools_view} \
+        {{ minimap2 \
+        -a --eqx --cs \
+        -k19 -w19 -O5,56 -E4,1 -A2 -B5 -z400,50 -r2000 -g5000 \
+        -t {threads} {input.asm} {input.reads} | {params.samtools_view} \
         samtools sort -T {params.tmp_dir} -m {resources.sort_mem}G -@ {threads} - ;}} > {output} 2>> {log}
         """
 
