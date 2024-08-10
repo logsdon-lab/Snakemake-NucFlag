@@ -99,7 +99,7 @@ rule merge_hifi_read_asm_alignments:
         alignment_idx=os.path.join(config["output_dir"], "{sm}_hifi.bam.bai"),
     threads: config["threads_aln"]
     resources:
-        mem="16G",
+        mem=config["mem_aln"],
         sort_mem="4G",
     params:
         tmp_dir=config.get("tmp_dir", os.environ.get("TMPDIR", "/tmp")),
