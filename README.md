@@ -74,9 +74,9 @@ logs_dir: "logs/nucflag"
 benchmarks_dir: "benchmarks/nucflag"
 # Job resources. Memory in GB.
 threads_aln: 8
-mem_aln: 30
+mem_aln: 30G
 processes_nucflag: 12
-mem_nucflag: 50
+mem_nucflag: 50G
 # samtools view filter flag.
 samtools_view_flag: 2308
 ```

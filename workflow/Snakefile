@@ -99,8 +99,8 @@ rule merge_hifi_read_asm_alignments:
         alignment_idx=os.path.join(config["output_dir"], "{sm}_hifi.bam.bai"),
     threads: config["threads_aln"]
     resources:
-        mem=16,
-        sort_mem=4,
+        mem="16G",
+        sort_mem="4G",
     params:
         tmp_dir=config.get("tmp_dir", os.environ.get("TMPDIR", "/tmp")),
     conda:
@@ -112,7 +112,7 @@ rule merge_hifi_read_asm_alignments:
     shell:
         """
         {{ samtools merge -@ {threads} - {input} | \
-        samtools sort -T {params.tmp_dir} -m {resources.sort_mem}G -@ {threads} -;}} > {output.alignment} 2> {log}
+        samtools sort -T {params.tmp_dir} -m {resources.sort_mem} -@ {threads} -;}} > {output.alignment} 2> {log}
         samtools index {output.alignment} 2>> {log}
         """
 
