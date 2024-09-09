@@ -2,6 +2,8 @@
 [![CI](https://github.com/logsdon-lab/Snakemake-NucFlag/actions/workflows/main.yml/badge.svg)](https://github.com/logsdon-lab/Snakemake-NucFlag/actions/workflows/main.yml)
 
 A workflow to map PacBio HiFi reads back to an assembly and check for misassemblies at specific regions via [`NucFlag`](https://github.com/logsdon-lab/NucFlag).
+
+This workflow will:
 1. Align reads via [`minimap2`](https://github.com/lh3/minimap2), [`pbmm2`](https://github.com/PacificBiosciences/pbmm2), or [`winnowmap`](https://github.com/marbl/Winnowmap).
 2. Filter unmapped reads and non-primary alignments.
 3. Run `NucFlag`.
@@ -97,7 +99,7 @@ Aligner default parameters:
     * `--eqx --cs -ax map-hifi`
 
 ##### By Sample
-The following optional are optional per sample:
+The following parameters are optional per sample:
 ```yaml
 samples: [
     {
