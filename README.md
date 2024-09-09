@@ -92,11 +92,11 @@ samtools_view_flag: 2308
 
 Aligner default parameters:
 * `winnowmap`
-    * `--MD -ax map-pb`
+    * `-a --eqx --cs -x map-pb`
 * `pbmm2`
     * `--log-level DEBUG --preset SUBREAD --min-length 5000`
 * `minimap2`
-    * `--eqx --cs -ax map-hifi`
+    * `-a --eqx --cs -x map-hifi`
 
 ##### By Sample
 The following parameters are optional per sample:
