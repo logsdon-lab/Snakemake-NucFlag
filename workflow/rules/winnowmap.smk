@@ -52,7 +52,7 @@ rule align_reads_to_asm:
         """
         {{ winnowmap -W {input.repetitive_kmers} \
         {params.aligner_opts} \
-        -t {threads} \
+        -t {threads} -I8g \
         {input.asm} {input.reads} | {params.samtools_view} \
         samtools sort -T {params.tmp_dir} -m {resources.sort_mem}G -@ {threads} - ;}} > {output} 2>> {log}
         """
