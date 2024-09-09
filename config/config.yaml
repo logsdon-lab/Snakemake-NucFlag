@@ -9,6 +9,9 @@ samples:
     ignore_bed: "config/nucflag_ignore.bed"
     overlay_beds: []
 
+# winnowmap, pbmm2, or minimap2
+# aligner_opts is optional. See README.md for defaults.
+aligner: "winnowmap"
 output_dir: "results/nucflag"
 output_coverage: false
 tmp_dir: "temp"

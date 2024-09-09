@@ -2,7 +2,9 @@
 [![CI](https://github.com/logsdon-lab/Snakemake-NucFlag/actions/workflows/main.yml/badge.svg)](https://github.com/logsdon-lab/Snakemake-NucFlag/actions/workflows/main.yml)
 
 A workflow to map PacBio HiFi reads back to an assembly and check for misassemblies at specific regions via [`NucFlag`](https://github.com/logsdon-lab/NucFlag).
-
+1. Align reads via [`minimap2`](https://github.com/lh3/minimap2), [`pbmm2`](https://github.com/PacificBiosciences/pbmm2), or [`winnowmap`](https://github.com/marbl/Winnowmap).
+2. Filter unmapped reads and non-primary alignments.
+3. Run `NucFlag`.
 
 ### Getting Started
 ```bash
@@ -62,6 +64,11 @@ samples:
 ##### General
 General configuration can be filled in `config.yaml`:
 ```yaml
+# Aligner to use.
+# Either "winnowmap", "minimap2", or "pbmm2".
+aligner: "winnowmap"
+# To override default params.
+aligner_opts: "--MD -ax map-pb"
 # Output directory
 output_dir: "results/nucflag"
 # Output 1st and 2nd base coverage in {output_dir}/{sm}_coverage.
@@ -80,6 +87,14 @@ mem_nucflag: 50G
 # samtools view filter flag.
 samtools_view_flag: 2308
 ```
+
+Aligner default parameters:
+* `winnowmap`
+    * `--MD -ax map-pb`
+* `pbmm2`
+    * `--log-level DEBUG --preset SUBREAD --min-length 5000`
+* `minimap2`
+    * `--eqx --cs -ax map-hifi`
 
 ##### By Sample
 The following optional are optional per sample:
@@ -148,4 +163,10 @@ use rule * from NucFlag as *
 rule all:
     input:
         expand(rules.nucflag.input, sm=SAMPLE_NAMES),
+```
+
+### Test
+To run the dry-run workflow. Workflow with real files is a WIP.
+```bash
+snakemake --configfile test/config.yaml -c 1 -np
 ```
