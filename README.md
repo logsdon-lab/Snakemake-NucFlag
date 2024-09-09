@@ -69,7 +69,7 @@ General configuration can be filled in `config.yaml`:
 # Aligner to use.
 # Either "winnowmap", "minimap2", or "pbmm2".
 aligner: "winnowmap"
-# To override default params.
+# To override default aligner params.
 aligner_opts: "--MD -ax map-pb"
 # Output directory
 output_dir: "results/nucflag"
