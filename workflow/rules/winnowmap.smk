@@ -1,3 +1,5 @@
+ENV_YAML = f"../env/{ALIGNER}.yaml"
+
 
 rule get_repetitive_kmers:
     input:

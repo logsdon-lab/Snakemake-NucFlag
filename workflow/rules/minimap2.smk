@@ -9,6 +9,7 @@ ALIGNER_OPTS = config.get(
         else "--log-level DEBUG --preset SUBREAD --min-length 5000"
     ),
 )
+ENV_YAML = f"../env/{ALIGNER}.yaml"
 
 
 rule align_reads_to_asm:
