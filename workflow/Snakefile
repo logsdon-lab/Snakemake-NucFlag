@@ -9,7 +9,7 @@ LOGS_DIR = config.get("logs_dir", "logs/nucflag")
 BMKS_DIR = config.get("benchmarks_dir", "benchmarks/nucflag")
 ALIGNERS = {"winnowmap", "pbmm2", "minimap2"}
 ALIGNER = config.get("aligner", "winnowmap")
-ENV_YAML = f"env/{ALIGNER}.yaml"
+ENV_YAML = os.path.abspath(f"env/{ALIGNER}.yaml")
 
 
 def get_asm(wc):
