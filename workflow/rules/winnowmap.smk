@@ -37,7 +37,9 @@ rule align_reads_to_asm:
     params:
         aligner_opts=config.get("aligner_opts", "-a --eqx --cs -x map-pb"),
         reads=lambda wc, input: (
-            f"<(samtools bam2fq {input})" if str(input).endswith(".bam") else input
+            f"<(samtools bam2fq {input.reads})"
+            if str(input.reads).endswith(".bam")
+            else input.reads
         ),
         tmp_dir=config.get("tmp_dir", os.environ.get("TMPDIR", "/tmp")),
         samtools_view=(

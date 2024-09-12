@@ -26,9 +26,9 @@ rule align_reads_to_asm:
         aligner="minimap2" if ALIGNER == "minimap2" else "pbmm2 align",
         aligner_opts=ALIGNER_OPTS,
         reads=lambda wc, input: (
-            f"<(samtools bam2fq {input})"
-            if str(input).endswith(".bam") and ALIGNER == "minimap2"
-            else input
+            f"<(samtools bam2fq {input.reads})"
+            if str(input.reads).endswith(".bam") and ALIGNER == "minimap2"
+            else input.reads
         ),
         aligner_threads="-t" if ALIGNER == "minimap2" else "-j",
         tmp_dir=config.get("tmp_dir", os.environ.get("TMPDIR", "/tmp")),
