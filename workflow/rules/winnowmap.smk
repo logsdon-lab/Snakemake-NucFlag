@@ -36,6 +36,9 @@ rule align_reads_to_asm:
         sort_mem=4,
     params:
         aligner_opts=config.get("aligner_opts", "-a --eqx --cs -x map-pb"),
+        reads=lambda wc, input: (
+            f"<(samtools bam2fq {input})" if str(input).endswith(".bam") else input
+        ),
         tmp_dir=config.get("tmp_dir", os.environ.get("TMPDIR", "/tmp")),
         samtools_view=(
             f"samtools view -F {config['samtools_view_flag']} -u - |"
@@ -53,6 +56,6 @@ rule align_reads_to_asm:
         {{ winnowmap -W {input.repetitive_kmers} \
         {params.aligner_opts} \
         -t {threads} -I8g \
-        {input.asm} {input.reads} | {params.samtools_view} \
+        {input.asm} {params.reads} | {params.samtools_view} \
         samtools sort -T {params.tmp_dir} -m {resources.sort_mem}G -@ {threads} - ;}} > {output} 2>> {log}
         """
