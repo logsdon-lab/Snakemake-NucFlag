@@ -56,14 +56,13 @@ rule align_reads_to_asm:
         aln_log_level="DEBUG",
         aln_preset="SUBREAD",
         aln_min_length=5000,
-        tmp_dir=config.get("tmp_dir", os.environ.get("TMPDIR", "/tmp")),
         samtools_view=(
             f"samtools view -F {config['samtools_view_flag']} -u - |"
             if config.get("samtools_view_flag")
             else ""
         ),
     shadow:
-        "shallow"
+        "minimal"
     conda:
         "env/tools.yaml"
     log:
@@ -77,7 +76,7 @@ rule align_reads_to_asm:
         --preset {params.aln_preset} \
         --min-length {params.aln_min_length} \
         -j {threads} {input.asm} {input.reads} | {params.samtools_view} \
-        samtools sort -T {params.tmp_dir} -m {resources.sort_mem} -@ {threads} - ;}} > {output} 2>> {log}
+        samtools sort -m {resources.sort_mem} -@ {threads} - ;}} > {output} 2>> {log}
         """
 
 
@@ -104,7 +103,7 @@ rule merge_hifi_read_asm_alignments:
         mem=config["mem_aln"],
         sort_mem=config.get("mem_sort_aln", "4G"),
     shadow:
-        "shallow"
+        "minimal"
     conda:
         "env/tools.yaml"
     log:
