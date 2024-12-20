@@ -62,6 +62,8 @@ rule align_reads_to_asm:
             if config.get("samtools_view_flag")
             else ""
         ),
+    shadow:
+        "shallow"
     conda:
         "env/tools.yaml"
     log:
@@ -101,8 +103,8 @@ rule merge_hifi_read_asm_alignments:
     resources:
         mem=config["mem_aln"],
         sort_mem=config.get("mem_sort_aln", "4G"),
-    params:
-        tmp_dir=config.get("tmp_dir", os.environ.get("TMPDIR", "/tmp")),
+    shadow:
+        "shallow"
     conda:
         "env/tools.yaml"
     log:
@@ -112,7 +114,7 @@ rule merge_hifi_read_asm_alignments:
     shell:
         """
         {{ samtools merge -@ {threads} - {input} | \
-        samtools sort -T {params.tmp_dir} -m {resources.sort_mem} -@ {threads} -;}} > {output.alignment} 2> {log}
+        samtools sort -m {resources.sort_mem} -@ {threads} -;}} > {output.alignment} 2> {log}
         samtools index {output.alignment} 2>> {log}
         """
 

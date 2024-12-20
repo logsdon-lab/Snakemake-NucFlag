@@ -26,7 +26,6 @@ samples:
 
 output_dir: "results/nucflag"
 output_coverage: true
-tmp_dir: "temp"
 logs_dir: "logs/nucflag"
 benchmarks_dir: "benchmarks/nucflag"
 threads_aln: 8
