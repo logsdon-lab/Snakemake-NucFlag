@@ -6,20 +6,20 @@ samples:
     region_bed: test/sample1/region.bed
   - name: sample2
     asm_dir: test/sample2/asm
-    asm_ext: fa
+    asm_rgx: ".*\\.fa$"
     read_dir: test/sample2/reads
-    read_ext: bam
+    read_rgx: ".*\\.bam$"
     region_bed: test/sample2/region.bed
     ignore_bed: "config/nucflag_ignore.bed"
   - name: sample3
     asm_fa: test/sample3/test.fa
     read_dir: test/sample3/reads
-    read_ext: bam
+    read_rgx: ".*\\.bam$"
     region_bed: test/sample3/region.bed
   - name: sample4
     asm_fa: test/sample4/test.fa
     read_dir: test/sample3/reads
-    read_ext: bam
+    read_rgx: ".*\\.bam$"
     config: test/config.yaml
     region_bed: test/sample4/region.bed
     overlay_beds: [test/sample4/overlay_1.bed, test/sample4/overlay_2.bed]
