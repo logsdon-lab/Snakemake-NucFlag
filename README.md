@@ -66,8 +66,6 @@ General configuration can be filled in `config.yaml`:
 output_dir: "results/nucflag"
 # Output 1st and 2nd base coverage in {output_dir}/{sm}_coverage.
 output_coverage: false
-# Temporary directory of intermediates
-tmp_dir: "temp"
 # Log directory
 logs_dir: "logs/nucflag"
 # Benchmarks directory
@@ -102,8 +100,8 @@ samples: [
 |Path|Description|
 |-|-|
 |`./{output_dir}/{sample}/{contig}.png`|Per-base coverage graph plot with heterozygous sites of read coverage and potential misassemblies highlighted.|
-|`./{output_dir}/{sample}_cen_misassemblies.bed`|Bed file with heterozygous sites of read coverage and potential misassemblies with their coordinates per contig.|
-|`./{output_dir}/{sample}_cen_status.bed`|Bed file with each centromeric contig, coordinates, and status. Either `good` or `misassembled`.|
+|`./{output_dir}/{sample}_misassemblies.bed`|Bed file with heterozygous sites of read coverage and potential misassemblies with their coordinates per contig.|
+|`./{output_dir}/{sample}_status.bed`|Bed file with each centromeric contig, coordinates, and status. Either `good` or `misassembled`.|
 |`./{output_dir}/{sample}_coverage/{contig}.tsv`|(Optional) TSV file with base position, 1st and 2nd base coverage, and status. Either `good` or `misassembled`.|
 
 
