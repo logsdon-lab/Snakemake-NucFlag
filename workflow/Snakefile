@@ -17,7 +17,7 @@ module Align:
         {
             **config,
             "aligner": "pbmm2",
-            "aigner_opts": "--log-level DEBUG --preset SUBREAD --min-length 5000",
+            "aligner_opts": "--log-level DEBUG --preset SUBREAD --min-length 5000 --strip",
             "logs_dir": LOGS_DIR,
             "benchmarks_dir": BMKS_DIR,
         }
