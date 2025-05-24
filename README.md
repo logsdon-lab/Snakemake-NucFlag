@@ -6,7 +6,7 @@ A workflow to map PacBio HiFi reads back to an assembly and check for misassembl
 
 ### Getting Started
 ```bash
-git clone git@github.com:logsdon-lab/Snakemake-NucFlag.git
+git clone git@github.com:logsdon-lab/Snakemake-NucFlag.git --recursive
 cd Snakemake-NucFlag
 ```
 

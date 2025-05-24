@@ -10,9 +10,7 @@ wildcard_constraints:
 
 module Align:
     snakefile:
-        github(
-            "logsdon-lab/Snakemake-Aligner", path="workflow/Snakefile", branch="main"
-        )
+        "rules/Snakemake-Aligner/workflow/Snakefile"
     config:
         {
             **config,
