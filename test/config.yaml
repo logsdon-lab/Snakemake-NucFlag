@@ -10,7 +10,7 @@ samples:
     read_dir: test/sample2/reads
     read_rgx: ".*\\.bam$"
     region_bed: test/sample2/region.bed
-    ignore_bed: "config/nucflag_ignore.bed"
+    ignore_bed: "test/ignore.bed"
   - name: sample3
     asm_fa: test/sample3/test.fa
     read_dir: test/sample3/reads
@@ -31,5 +31,6 @@ benchmarks_dir: "benchmarks/nucflag"
 threads_aln: 8
 mem_aln: 30G
 processes_nucflag: 12
+threads_nucflag: 2
 mem_nucflag: 50G
 samtools_view_flag: 2308

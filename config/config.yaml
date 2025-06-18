@@ -5,8 +5,8 @@ samples:
     read_dir: "/project/logsdon_shared/data/platinum_genomes/data/pacbio_hifi/K1463_2216/"
     read_rgx: ".*\\.fastq.gz$"
     config: "config/nucflag.toml"
+    preset: "hifi"
     region_bed: "/project/logsdon_shared/projects/asm-repair/fa/K1463_2216_ALR_regions.bed"
-    ignore_bed: "config/nucflag_ignore.bed"
     overlay_beds: []
 
 output_dir: "results/nucflag"
@@ -16,5 +16,6 @@ benchmarks_dir: "benchmarks/nucflag"
 threads_aln: 8
 mem_aln: 30G
 processes_nucflag: 12
+threads_nucflag: 2
 mem_nucflag: 50G
 samtools_view_flag: 2308
