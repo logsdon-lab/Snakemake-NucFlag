@@ -10,7 +10,7 @@ samples:
     overlay_beds: []
 
 output_dir: "results/nucflag"
-output_coverage: false
+output_pileup: false
 logs_dir: "logs/nucflag"
 benchmarks_dir: "benchmarks/nucflag"
 threads_aln: 8
