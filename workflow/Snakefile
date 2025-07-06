@@ -1,5 +1,7 @@
 LOGS_DIR = config.get("logs_dir", "logs/nucflag")
 BMKS_DIR = config.get("benchmarks_dir", "benchmarks/nucflag")
+ALIGNER = config.get("aligner", "minimap2")
+ALIGNER_OPTS = config.get("aligner_opts", "-y -a --eqx --cs -x lr:hqae -I8g")
 SAMPLE_INFO = {sm["name"]: sm for sm in config["samples"]}
 
 
@@ -13,8 +15,8 @@ module Align:
     config:
         {
             **config,
-            "aligner": "pbmm2",
-            "aligner_opts": "--log-level DEBUG --preset SUBREAD --min-length 5000 --strip",
+            "aligner": ALIGNER,
+            "aligner_opts": ALIGNER_OPTS,
             "logs_dir": LOGS_DIR,
             "benchmarks_dir": BMKS_DIR,
         }
