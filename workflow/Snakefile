@@ -22,13 +22,14 @@ module Align:
         }
 
 
-use rule * from Align
+use rule * from Align as aln_*
 
 
 rule check_asm_nucflag:
     input:
-        bam_file=ancient(rules.merge_read_asm_alignments.output.alignment),
-        fasta_file=ancient(rules.merge_asm_files.output.asm),
+        bam=ancient(rules.aln_merge_read_asm_alignments.output.alignment),
+        fa=ancient(rules.aln_merge_asm_files.output.asm),
+        fai=ancient(rules.aln_merge_asm_files.output.idx),
         # Optional arguments.
         regions=lambda wc: SAMPLE_INFO[str(wc.sm)].get("region_bed", []),
         config=lambda wc: SAMPLE_INFO[str(wc.sm)].get("config", []),
@@ -83,8 +84,8 @@ rule check_asm_nucflag:
     shell:
         """
         nucflag \
-        -i {input.bam_file} \
-        -f {input.fasta_file} \
+        -i {input.bam} \
+        -f {input.fa} \
         -d {output.plot_dir} \
         -o {output.misassemblies} \
         -s {output.status} \
