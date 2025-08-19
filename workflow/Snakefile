@@ -28,8 +28,16 @@ use rule * from Align as aln_*
 rule check_asm_nucflag:
     input:
         bam=ancient(rules.aln_merge_read_asm_alignments.output.alignment),
-        fa=ancient(rules.aln_merge_asm_files.output.asm),
-        fai=ancient(rules.aln_merge_asm_files.output.idx),
+        fa=lambda wc: ancient(
+            SAMPLE_INFO[str(wc.sm)]["asm_fa"]
+            if SAMPLE_INFO[str(wc.sm)].get("asm_fa")
+            else rules.aln_merge_asm_files.output.asm
+        ),
+        fai=lambda wc: ancient(
+            SAMPLE_INFO[str(wc.sm)]["asm_fa"] + ".fai"
+            if SAMPLE_INFO[str(wc.sm)].get("asm_fa")
+            else rules.aln_merge_asm_files.output.idx
+        ),
         # Optional arguments.
         regions=lambda wc: SAMPLE_INFO[str(wc.sm)].get("region_bed", []),
         config=lambda wc: SAMPLE_INFO[str(wc.sm)].get("config", []),
@@ -71,11 +79,12 @@ rule check_asm_nucflag:
             if config.get("output_coverage")
             else ""
         ),
-    threads: config["threads_nucflag"]
+    # LSF executor limits CPU usage based on threads.
+    threads: config["processes_nucflag"]
     conda:
         "env/nucflag.yaml"
     resources:
-        processes=config["processes_nucflag"],
+        threads=config["threads_nucflag"],
         mem=config["mem_nucflag"],
     log:
         os.path.join(LOGS_DIR, "run_nucflag_{sm}.log"),
@@ -89,8 +98,8 @@ rule check_asm_nucflag:
         -d {output.plot_dir} \
         -o {output.misassemblies} \
         -s {output.status} \
-        -t {threads} \
-        -p {resources.processes} \
+        -t {resources.threads} \
+        -p {threads} \
         {params.preset} \
         {params.config} \
         {params.regions} \
