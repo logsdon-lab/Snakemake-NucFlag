@@ -1,4 +1,3 @@
-
 LOGS_DIR = config.get("logs_dir", "logs/nucflag")
 BMKS_DIR = config.get("benchmarks_dir", "benchmarks/nucflag")
 SAMPLE_INFO = {sm["name"]: sm for sm in config["samples"]}
@@ -10,9 +9,7 @@ wildcard_constraints:
 
 module Align:
     snakefile:
-        github(
-            "logsdon-lab/Snakemake-Aligner", path="workflow/Snakefile", branch="main"
-        )
+        github("logsdon-lab/Snakemake-Aligner", path="workflow/Snakefile", tag="v0.1.0")
     config:
         {
             **config,
