@@ -92,7 +92,7 @@ rule check_asm_nucflag:
         os.path.join(BMKS_DIR, "run_nucflag_{sm}.tsv")
     shell:
         """
-        nucflag \
+        nucflag call \
         -i {input.bam} \
         -f {input.fa} \
         -d {output.plot_dir} \
