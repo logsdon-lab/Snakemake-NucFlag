@@ -44,7 +44,11 @@ rule check_asm_nucflag:
         ignore_regions=lambda wc: SAMPLE_INFO[str(wc.sm)].get("ignore_bed", []),
         overlay_regions=lambda wc: SAMPLE_INFO[str(wc.sm)].get("overlay_beds", []),
     output:
-        plot_dir=directory(os.path.join(config["output_dir"], "{sm}")),
+        plot_dir=(
+            directory(os.path.join(config["output_dir"], "{sm}"))
+            if config.get("output_plots")
+            else []
+        ),
         pileup_dir=(
             directory(os.path.join(config["output_dir"], "{sm}_pileup"))
             if config.get("output_pileup")
@@ -74,6 +78,11 @@ rule check_asm_nucflag:
             if input.overlay_regions
             else ""
         ),
+        output_plots=lambda wc, output: (
+            f"--output_plot_dir {output.plot_dir}"
+            if config.get("output_plots")
+            else ""
+        ),
         output_pileup=lambda wc, output: (
             f"--output_pileup_dir {output.pileup_dir}"
             if config.get("output_coverage")
@@ -95,7 +104,6 @@ rule check_asm_nucflag:
         nucflag call \
         -i {input.bam} \
         -f {input.fa} \
-        -d {output.plot_dir} \
         -o {output.misassemblies} \
         -s {output.status} \
         -t {resources.threads} \
@@ -105,6 +113,7 @@ rule check_asm_nucflag:
         {params.regions} \
         {params.ignore_regions} \
         {params.overlay_regions} \
+        {params.output_plots} \
         {params.output_pileup} &> {log}
         """
 
