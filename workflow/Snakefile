@@ -142,6 +142,8 @@ rule generate_ideogram:
         os.path.join(LOGS_DIR, "ideogram_{sm}.log"),
     benchmark:
         os.path.join(BMKS_DIR, "ideogram_{sm}.tsv")
+    conda:
+        "env/nucflag.yaml"
     params:
         output_prefix=lambda wc, output: os.path.splitext(output.plots[0])[0],
         cytobands=lambda wc, input: f"-c {input.cytobands}" if input.cytobands else "",
@@ -177,6 +179,8 @@ rule generate_breakdown_plot:
         output_prefix=lambda wc, output: os.path.splitext(output.plots[0])[0],
         filter_length=config.get("breakdown_filter_length", 10_000_000),
         otype=config.get("breakdown_type", "percent"),
+    conda:
+        "env/nucflag.yaml"
     shell:
         """
         nucflag breakdown \
