@@ -64,8 +64,12 @@ General configuration can be filled in `config.yaml`:
 ```yaml
 # Output directory
 output_dir: "results/nucflag"
-# Output 1st and 2nd base coverage in {output_dir}/{sm}_coverage.
-output_coverage: false
+# Output pileup signals to {output_dir}/{sm}_pileup.
+output_pileup: false
+# Output ideogram
+output_ideogram: false
+# Output breakdown
+output_breakdown: false
 # Log directory
 logs_dir: "logs/nucflag"
 # Benchmarks directory
@@ -77,6 +81,14 @@ processes_nucflag: 12
 mem_nucflag: 50G
 # samtools view filter flag.
 samtools_view_flag: 2308
+# Minimum length to display for ideogram.
+ideogram_filter_length: 10000000
+# Height of individual track.
+ideogram_track_height: 2.0
+# Minimum length to display for breakdown plot.
+breakdown_filter_length: 10000000
+# Show breakdown by percent or length.
+breakdown_type: percent
 ```
 
 ##### By Sample
@@ -91,7 +103,11 @@ samples: [
         # Regions to ignore.
         ignore_bed: "",
         # Regions to overlap.
-        overlay_beds: []
+        overlay_beds: [],
+        # Cytobands
+        # Only applicable with output_ideogram
+        # Expects BED file (chrom, chromStart, chromEnd, name, bandType) used in pyideogram.
+        cytobands: ""
     }
 ]
 ```
@@ -99,10 +115,12 @@ samples: [
 ### Output
 |Path|Description|
 |-|-|
-|`./{output_dir}/{sample}/{contig}.png`|Per-base coverage graph plot with heterozygous sites of read coverage and potential misassemblies highlighted.|
-|`./{output_dir}/{sample}_misassemblies.bed`|Bed file with heterozygous sites of read coverage and potential misassemblies with their coordinates per contig.|
-|`./{output_dir}/{sample}_status.bed`|Bed file with each centromeric contig, coordinates, and status. Either `good` or `misassembled`.|
-|`./{output_dir}/{sample}_coverage/{contig}.tsv`|(Optional) TSV file with base position, 1st and 2nd base coverage, and status. Either `good` or `misassembled`.|
+|`./{output_dir}/{sample}/{contig}.png`|Per-base coverage, mismatch, insertion, and deletion pileup plot with calls highlighted.|
+|`./{output_dir}/{sample}_misassemblies.bed`|BED9 file with potential misassemblies with their coordinates per contig.|
+|`./{output_dir}/{sample}_status.bed`|BED file with each chromosome, coordinates, status (Either `correct` or `misassembled`), and percent of each call within region.|
+|`./{output_dir}/{sample}_pileup/{contig}.bw`|(Optional) BigWigs of above signals. Use `bigtools` to merge.|
+|`./{output_dir}/{sample}_ideogram.(pdf/png)`|(Optional) Ideogram.|
+|`./{output_dir}/{sample}_breakdown.(pdf/png)`|(Optional) Breakdown.|
 
 
 ### Usage

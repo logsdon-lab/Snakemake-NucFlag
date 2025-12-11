@@ -26,6 +26,8 @@ samples:
 
 output_dir: "results/nucflag"
 output_pileup: true
+output_ideogram: true
+output_breakdown: true
 logs_dir: "logs/nucflag"
 benchmarks_dir: "benchmarks/nucflag"
 threads_aln: 8

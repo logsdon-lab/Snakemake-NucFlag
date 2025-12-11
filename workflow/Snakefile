@@ -1,3 +1,6 @@
+import os
+
+
 LOGS_DIR = config.get("logs_dir", "logs/nucflag")
 BMKS_DIR = config.get("benchmarks_dir", "benchmarks/nucflag")
 ALIGNER = config.get("aligner", "minimap2")
@@ -85,7 +88,7 @@ rule check_asm_nucflag:
         ),
         output_pileup=lambda wc, output: (
             f"--output_pileup_dir {output.pileup_dir}"
-            if config.get("output_coverage")
+            if config.get("output_pileup")
             else ""
         ),
     # LSF executor limits CPU usage based on threads.
@@ -118,7 +121,84 @@ rule check_asm_nucflag:
         """
 
 
+rule generate_ideogram:
+    input:
+        bed=rules.check_asm_nucflag.output.misassemblies,
+        cytobands=lambda wc: (
+            SAMPLE_INFO[str(wc.sm)]["cytobands"]
+            if SAMPLE_INFO[str(wc.sm)].get("cytobands")
+            else []
+        ),
+    output:
+        plots=multiext(
+            os.path.join(
+                config["output_dir"],
+                "{sm}_ideogram",
+            ),
+            png=".png",
+            pdf=".pdf",
+        ),
+    log:
+        os.path.join(LOGS_DIR, "ideogram_{sm}.log"),
+    benchmark:
+        os.path.join(BMKS_DIR, "ideogram_{sm}.tsv")
+    params:
+        output_prefix=lambda wc, output: os.path.splitext(output.plots[0])[0],
+        cytobands=lambda wc, input: f"-c {input.cytobands}" if input.cytobands else "",
+        filter_length=config.get("ideogram_filter_length", 10_000_000),
+        track_height=config.get("ideogram_track_height", 2.0),
+    shell:
+        """
+        nucflag ideogram \
+        -i {input.bed} {params.cytobands} \
+        -l {params.filter_length} \
+        -t {params.track_height} \
+        -o {params.output_prefix} 2> {log}
+        """
+
+
+rule generate_breakdown_plot:
+    input:
+        bed=rules.check_asm_nucflag.output.misassemblies,
+    output:
+        plots=multiext(
+            os.path.join(
+                config["output_dir"],
+                "{sm}_breakdown",
+            ),
+            png=".png",
+            pdf=".pdf",
+        ),
+    log:
+        os.path.join(LOGS_DIR, "breakdown_plot_{sm}.log"),
+    benchmark:
+        os.path.join(BMKS_DIR, "breakdown_plot_{sm}.tsv")
+    params:
+        output_prefix=lambda wc, output: os.path.splitext(output.plots[0])[0],
+        filter_length=config.get("breakdown_filter_length", 10_000_000),
+        otype=config.get("breakdown_type", "percent"),
+    shell:
+        """
+        nucflag breakdown \
+        -i {input.bed} \
+        -l {params.filter_length} \
+        -t {params.otype} \
+        -o {params.output_prefix} 2> {log}
+        """
+
+
+OUTPUTS = [expand(rules.check_asm_nucflag.output, sm=SAMPLE_INFO.keys())]
+
+
+if config.get("output_ideogram"):
+    OUTPUTS.append(expand(rules.generate_ideogram.output, sm=SAMPLE_INFO.keys()))
+
+
+if config.get("output_breakdown"):
+    OUTPUTS.append(expand(rules.generate_breakdown_plot.output, sm=SAMPLE_INFO.keys()))
+
+
 rule nucflag:
     input:
-        expand(rules.check_asm_nucflag.output, sm=SAMPLE_INFO.keys()),
+        OUTPUTS,
     default_target: True
