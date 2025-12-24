@@ -65,7 +65,8 @@ General configuration can be filled in `config.yaml`:
 # Output directory
 output_dir: "results/nucflag"
 # Output pileup signals to {output_dir}/{sm}_pileup.
-output_pileup: false
+# ["cov", "mismatch", "mapq", "insertion", "deletion", "softclip"]
+output_pileup: [cov, mismatch]
 # Output ideogram
 output_ideogram: false
 # Output breakdown

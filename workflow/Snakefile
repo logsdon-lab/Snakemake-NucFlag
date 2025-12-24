@@ -87,7 +87,7 @@ rule check_asm_nucflag:
             else ""
         ),
         output_pileup=lambda wc, output: (
-            f"--output_pileup_dir {output.pileup_dir}"
+            f"--output_pileup_dir {output.pileup_dir} --add_pileup_data {' '.join(config['output_pileup'])}"
             if config.get("output_pileup")
             else ""
         ),

@@ -25,7 +25,7 @@ samples:
     overlay_beds: [test/sample4/overlay_1.bed, test/sample4/overlay_2.bed]
 
 output_dir: "results/nucflag"
-output_pileup: true
+output_pileup: [cov, mismatch, mapq]
 output_ideogram: true
 output_breakdown: true
 logs_dir: "logs/nucflag"
