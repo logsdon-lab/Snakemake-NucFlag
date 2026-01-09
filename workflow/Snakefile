@@ -39,7 +39,9 @@ def get_fai(wc):
     fa = SAMPLE_INFO[str(wc.sm)].get("asm_fa")
     if not fa:
         return ancient(rules.aln_merge_asm_files.output.idx)
-    elif isinstance(fa, (snakemake.io.Namedlist, snakemake.io._IOFile)):
+    elif isinstance(
+        fa, (snakemake.io.Namedlist, snakemake.io._IOFile, snakemake.io.AnnotatedString)
+    ):
         return []
     else:
         return f"{fa}.fai"
