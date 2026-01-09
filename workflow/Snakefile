@@ -1,4 +1,5 @@
 import os
+import snakemake.io
 
 
 LOGS_DIR = config.get("logs_dir", "logs/nucflag")
@@ -28,6 +29,22 @@ module Align:
 use rule * from Align as aln_*
 
 
+def get_fai(wc):
+    """
+    Need to allow null in case where asm_fa is a rule output.
+    * It is the caller's responsibility to ensure that an index is generated.
+
+    Otherwise, require to exist at workflow compile time.
+    """
+    fa = SAMPLE_INFO[str(wc.sm)].get("asm_fa")
+    if not fa:
+        return ancient(rules.aln_merge_asm_files.output.idx)
+    elif isinstance(fa, (snakemake.io.Namedlist, snakemake.io._IOFile)):
+        return []
+    else:
+        return f"{fa}.fai"
+
+
 rule check_asm_nucflag:
     input:
         bam=ancient(rules.aln_merge_read_asm_alignments.output.alignment),
@@ -36,11 +53,7 @@ rule check_asm_nucflag:
             if SAMPLE_INFO[str(wc.sm)].get("asm_fa")
             else rules.aln_merge_asm_files.output.asm
         ),
-        fai=lambda wc: ancient(
-            SAMPLE_INFO[str(wc.sm)]["asm_fa"] + ".fai"
-            if SAMPLE_INFO[str(wc.sm)].get("asm_fa")
-            else rules.aln_merge_asm_files.output.idx
-        ),
+        fai=get_fai,
         # Optional arguments.
         regions=lambda wc: SAMPLE_INFO[str(wc.sm)].get("region_bed", []),
         config=lambda wc: SAMPLE_INFO[str(wc.sm)].get("config", []),
