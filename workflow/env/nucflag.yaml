@@ -4,6 +4,5 @@ channels:
 dependencies:
   - python==3.12.0
   - pip
-  - git-lfs # Temporary
   - pip:
-    - git+https://github.com/logsdon-lab/NucFlag.git@feature/v1.0
+    - nucflag==1.0.0a2
