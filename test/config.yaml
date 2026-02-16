@@ -20,7 +20,6 @@ samples:
     asm_fa: test/sample4/test.fa
     read_dir: test/sample3/reads
     read_rgx: ".*\\.bam$"
-    config: test/config.yaml
     region_bed: test/sample4/region.bed
     overlay_beds: [test/sample4/overlay_1.bed, test/sample4/overlay_2.bed]
 
