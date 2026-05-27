@@ -10,7 +10,7 @@ jobs:
       with:
         submodules: 'true'
     - name: snakemake
-      uses: snakemake/snakemake-github-action@v1.25.1
+      uses: snakemake/snakemake-github-action@v2.1.2
       with:
         directory: .
         snakefile: workflow/Snakefile
