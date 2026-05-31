@@ -92,7 +92,7 @@ rule check_asm_nucflag:
             f"--ignore_regions {input.ignore_regions}" if input.ignore_regions else ""
         ),
         overlay_regions=lambda wc, input: (
-            f"--overlay_regions {' '.join(input.overlay_regions)}"
+            f"--tracks {' '.join(input.overlay_regions)}"
             if input.overlay_regions
             else ""
         ),
