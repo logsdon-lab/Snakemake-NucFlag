@@ -1,6 +1,11 @@
+import os
+import snakemake.io
+
 
 LOGS_DIR = config.get("logs_dir", "logs/nucflag")
 BMKS_DIR = config.get("benchmarks_dir", "benchmarks/nucflag")
+ALIGNER = config.get("aligner", "minimap2")
+ALIGNER_OPTS = config.get("aligner_opts", "-y -a --eqx --cs -x lr:hqae -I8g")
 SAMPLE_INFO = {sm["name"]: sm for sm in config["samples"]}
 
 
@@ -14,59 +19,99 @@ module Align:
     config:
         {
             **config,
-            "aligner": "pbmm2",
-            "aligner_opts": "--log-level DEBUG --preset SUBREAD --min-length 5000 --strip",
+            "aligner": ALIGNER,
+            "aligner_opts": ALIGNER_OPTS,
             "logs_dir": LOGS_DIR,
             "benchmarks_dir": BMKS_DIR,
         }
 
 
-use rule * from Align
+use rule * from Align as aln_*
+
+
+def get_fai(wc):
+    """
+    Need to allow null in case where asm_fa is a rule output.
+    * It is the caller's responsibility to ensure that an index is generated.
+
+    Otherwise, require to exist at workflow compile time.
+    """
+    fa = SAMPLE_INFO[str(wc.sm)].get("asm_fa")
+    if not fa:
+        return ancient(rules.aln_merge_asm_files.output.idx)
+    elif isinstance(
+        fa, (snakemake.io.Namedlist, snakemake.io._IOFile, snakemake.io.AnnotatedString)
+    ):
+        return []
+    else:
+        return f"{fa}.fai"
 
 
 rule check_asm_nucflag:
     input:
-        bam_file=ancient(rules.merge_read_asm_alignments.output.alignment),
+        bam=ancient(rules.aln_merge_read_asm_alignments.output.alignment),
+        fa=lambda wc: ancient(
+            SAMPLE_INFO[str(wc.sm)]["asm_fa"]
+            if SAMPLE_INFO[str(wc.sm)].get("asm_fa")
+            else rules.aln_merge_asm_files.output.asm
+        ),
+        fai=get_fai,
         # Optional arguments.
         regions=lambda wc: SAMPLE_INFO[str(wc.sm)].get("region_bed", []),
         config=lambda wc: SAMPLE_INFO[str(wc.sm)].get("config", []),
         ignore_regions=lambda wc: SAMPLE_INFO[str(wc.sm)].get("ignore_bed", []),
         overlay_regions=lambda wc: SAMPLE_INFO[str(wc.sm)].get("overlay_beds", []),
     output:
-        plot_dir=directory(os.path.join(config["output_dir"], "{sm}")),
-        cov_dir=(
-            directory(os.path.join(config["output_dir"], "{sm}_coverage"))
-            if config.get("output_coverage")
+        plot_dir=(
+            directory(os.path.join(config["output_dir"], "{sm}"))
+            if config.get("output_plots")
+            else []
+        ),
+        pileup_dir=(
+            directory(os.path.join(config["output_dir"], "{sm}_pileup"))
+            if config.get("output_pileup")
             else []
         ),
         misassemblies=os.path.join(
             config["output_dir"],
             "{sm}_misassemblies.bed",
         ),
-        asm_status=os.path.join(
+        status=os.path.join(
             config["output_dir"],
             "{sm}_status.bed",
         ),
     params:
+        preset=lambda wc: (
+            f"-x {SAMPLE_INFO[str(wc.sm)]['preset']}"
+            if SAMPLE_INFO[str(wc.sm)].get("preset")
+            else ""
+        ),
         regions=lambda wc, input: f"-b {input.regions}" if input.regions else "",
         config=lambda wc, input: f"-c {input.config}" if input.config else "",
         ignore_regions=lambda wc, input: (
             f"--ignore_regions {input.ignore_regions}" if input.ignore_regions else ""
         ),
         overlay_regions=lambda wc, input: (
-            f"--overlay_regions {' '.join(input.overlay_regions)}"
+            f"--tracks {' '.join(input.overlay_regions)}"
             if input.overlay_regions
             else ""
         ),
-        output_coverage=lambda wc, output: (
-            f"--output_cov_dir {output.cov_dir}"
-            if config.get("output_coverage")
+        output_plots=lambda wc, output: (
+            f"--output_plot_dir {output.plot_dir}"
+            if config.get("output_plots")
             else ""
         ),
+        output_pileup=lambda wc, output: (
+            f"--output_pileup_dir {output.pileup_dir} --add_pileup_data {' '.join(config['output_pileup'])}"
+            if config.get("output_pileup")
+            else ""
+        ),
+    # LSF executor limits CPU usage based on threads.
     threads: config["processes_nucflag"]
     conda:
         "env/nucflag.yaml"
     resources:
+        threads=config["threads_nucflag"],
         mem=config["mem_nucflag"],
     log:
         os.path.join(LOGS_DIR, "run_nucflag_{sm}.log"),
@@ -74,22 +119,105 @@ rule check_asm_nucflag:
         os.path.join(BMKS_DIR, "run_nucflag_{sm}.tsv")
     shell:
         """
-        nucflag \
-        -i {input.bam_file} \
-        -d {output.plot_dir} \
+        nucflag call \
+        -i {input.bam} \
+        -f {input.fa} \
         -o {output.misassemblies} \
-        -t {threads} \
+        -s {output.status} \
+        -t {resources.threads} \
         -p {threads} \
-        -s {output.asm_status} \
+        {params.preset} \
         {params.config} \
         {params.regions} \
         {params.ignore_regions} \
         {params.overlay_regions} \
-        {params.output_coverage} &> {log}
+        {params.output_plots} \
+        {params.output_pileup} &> {log}
         """
+
+
+rule generate_ideogram:
+    input:
+        bed=rules.check_asm_nucflag.output.misassemblies,
+        cytobands=lambda wc: (
+            SAMPLE_INFO[str(wc.sm)]["cytobands"]
+            if SAMPLE_INFO[str(wc.sm)].get("cytobands")
+            else []
+        ),
+    output:
+        plots=multiext(
+            os.path.join(
+                config["output_dir"],
+                "{sm}_ideogram",
+            ),
+            png=".png",
+            pdf=".pdf",
+        ),
+    log:
+        os.path.join(LOGS_DIR, "ideogram_{sm}.log"),
+    benchmark:
+        os.path.join(BMKS_DIR, "ideogram_{sm}.tsv")
+    conda:
+        "env/nucflag.yaml"
+    params:
+        output_prefix=lambda wc, output: os.path.splitext(output.plots[0])[0],
+        cytobands=lambda wc, input: f"-c {input.cytobands}" if input.cytobands else "",
+        filter_length=config.get("ideogram_filter_length", 10_000_000),
+        track_height=config.get("ideogram_track_height", 2.0),
+    shell:
+        """
+        nucflag ideogram \
+        -i {input.bed} {params.cytobands} \
+        -l {params.filter_length} \
+        -t {params.track_height} \
+        -o {params.output_prefix} 2> {log}
+        """
+
+
+rule generate_breakdown_plot:
+    input:
+        bed=rules.check_asm_nucflag.output.misassemblies,
+    output:
+        plots=multiext(
+            os.path.join(
+                config["output_dir"],
+                "{sm}_breakdown",
+            ),
+            png=".png",
+            pdf=".pdf",
+        ),
+    log:
+        os.path.join(LOGS_DIR, "breakdown_plot_{sm}.log"),
+    benchmark:
+        os.path.join(BMKS_DIR, "breakdown_plot_{sm}.tsv")
+    params:
+        output_prefix=lambda wc, output: os.path.splitext(output.plots[0])[0],
+        filter_length=config.get("breakdown_filter_length", 10_000_000),
+        otype=config.get("breakdown_type", "percent"),
+    conda:
+        "env/nucflag.yaml"
+    shell:
+        """
+        nucflag breakdown \
+        -i {input.bed} \
+        -l {params.filter_length} \
+        -t {params.otype} \
+        -o {params.output_prefix} 2> {log}
+        """
+
+
+OUTPUTS = [expand(rules.check_asm_nucflag.output, sm=SAMPLE_INFO.keys())]
+
+
+if config.get("output_ideogram"):
+    OUTPUTS.append(expand(rules.generate_ideogram.output, sm=SAMPLE_INFO.keys()))
+
+
+if config.get("output_breakdown"):
+    OUTPUTS.append(expand(rules.generate_breakdown_plot.output, sm=SAMPLE_INFO.keys()))
 
 
 rule nucflag:
     input:
-        expand(rules.check_asm_nucflag.output, sm=SAMPLE_INFO.keys()),
+        OUTPUTS,
     default_target: True
