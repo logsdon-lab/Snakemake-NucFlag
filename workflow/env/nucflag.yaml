@@ -3,6 +3,5 @@ channels:
   - bioconda
 dependencies:
   - python==3.12.0
-  - pip
-  - pip:
-    - nucflag==1.0.0
+  - nucflag>=1.0.0,<2.0.0
+  - polars>=1.6,<2.0
